@@ -1,0 +1,49 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+
+export type ClaimDocument = HydratedDocument<Claim>;
+
+export enum ClaimStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+@Schema()
+export class Claim {
+  @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
+  patient!: Types.ObjectId;
+
+  @Prop({ required: true, trim: true })
+  name!: string;
+
+  @Prop({ required: true, lowercase: true, trim: true })
+  email!: string;
+
+  @Prop({ required: true, min: 0 })
+  claimAmount!: number;
+
+  @Prop({ required: true, trim: true })
+  description!: string;
+
+  @Prop()
+  document?: string;
+
+  @Prop({
+    required: true,
+    enum: ClaimStatus,
+    default: ClaimStatus.PENDING,
+  })
+  status!: ClaimStatus;
+
+  @Prop({ default: Date.now })
+  submissionDate!: Date;
+
+  @Prop({ min: 0 })
+  approvedAmount?: number;
+
+  @Prop({ trim: true })
+  insurerComments?: string;
+}
+
+export const ClaimSchema = SchemaFactory.createForClass(Claim);
