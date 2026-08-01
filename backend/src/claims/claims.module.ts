@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { ClaimsService } from './claims.service';
 import { Claim, ClaimSchema } from './schemas/claim.schema';
+import { ClaimsController } from './claims.controller';
 
 @Module({
   imports: [
@@ -15,5 +16,6 @@ import { Claim, ClaimSchema } from './schemas/claim.schema';
   ],
   providers: [ClaimsService],
   exports: [ClaimsService],
+  controllers: [ClaimsController],
 })
 export class ClaimsModule {}
