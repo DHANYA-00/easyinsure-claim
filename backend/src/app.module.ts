@@ -4,8 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import { ClaimsModule } from './claims/claims.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -22,8 +23,8 @@ import { ClaimsModule } from './claims/claims.module';
     }),
 
     UsersModule,
-
     ClaimsModule,
+    AuthModule,
   ],
 
   controllers: [AppController],
