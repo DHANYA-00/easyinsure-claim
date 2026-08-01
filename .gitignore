@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+*.log
+
+# Uploaded claim documents
+backend/uploads/claims/*
+!backend/uploads/claims/.gitkeep
