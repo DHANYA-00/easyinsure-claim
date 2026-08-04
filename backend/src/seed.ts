@@ -9,9 +9,7 @@ import { User, UserDocument, UserRole } from './users/schemas/user.schema';
 async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
 
-  const userModel = app.get<Model<UserDocument>>(
-    getModelToken(User.name),
-  );
+  const userModel = app.get<Model<UserDocument>>(getModelToken(User.name));
 
   const users = [
     {

@@ -2,22 +2,13 @@ import { Module } from '@nestjs/common';
 
 import { MongooseModule } from '@nestjs/mongoose';
 
-import {
-  ClaimsService,
-} from './claims.service';
+import { ClaimsService } from './claims.service';
 
-import {
-  ClaimsController,
-} from './claims.controller';
+import { ClaimsController } from './claims.controller';
 
-import {
-  Claim,
-  ClaimSchema,
-} from './schemas/claim.schema';
+import { Claim, ClaimSchema } from './schemas/claim.schema';
 
-import {
-  AuthModule,
-} from '../auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -31,16 +22,10 @@ import {
     ]),
   ],
 
-  controllers: [
-    ClaimsController,
-  ],
+  controllers: [ClaimsController],
 
-  providers: [
-    ClaimsService,
-  ],
+  providers: [ClaimsService],
 
-  exports: [
-    ClaimsService,
-  ],
+  exports: [ClaimsService],
 })
 export class ClaimsModule {}
