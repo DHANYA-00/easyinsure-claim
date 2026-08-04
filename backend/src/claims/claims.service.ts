@@ -8,11 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import {
-  Claim,
-  ClaimDocument,
-  ClaimStatus,
-} from './schemas/claim.schema';
+import { Claim, ClaimDocument, ClaimStatus } from './schemas/claim.schema';
 
 @Injectable()
 export class ClaimsService {
@@ -21,17 +17,24 @@ export class ClaimsService {
     private readonly claimModel: Model<ClaimDocument>,
   ) {}
 
-  // ---------------------------------------------------------
+  // =========================================================
   // CREATE CLAIM
-  // ---------------------------------------------------------
+  // =========================================================
 
   async create(data: {
     patient: string;
     name: string;
     email: string;
     claimAmount: number;
-    description: string;
+    description?: string;
     document?: string;
+    documents?: Array<{
+      filename: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+    }>;
+    documentName?: string;
     documentOriginalName?: string;
     documentMimeType?: string;
     documentSize?: number;
@@ -40,27 +43,68 @@ export class ClaimsService {
       throw new BadRequestException('Invalid patient ID');
     }
 
-    return this.claimModel.create({
+    if (!data.name?.trim()) {
+      throw new BadRequestException('Patient name is required');
+    }
+
+    if (!data.email?.trim()) {
+      throw new BadRequestException('Email is required');
+    }
+
+    if (
+      data.claimAmount === undefined ||
+      data.claimAmount === null ||
+      Number.isNaN(Number(data.claimAmount))
+    ) {
+      throw new BadRequestException('Claim amount must be a valid number');
+    }
+
+    if (Number(data.claimAmount) <= 0) {
+      throw new BadRequestException('Claim amount must be greater than zero');
+    }
+
+    const claim = await this.claimModel.create({
       patient: new Types.ObjectId(data.patient),
 
-      name: data.name,
-      email: data.email,
-      claimAmount: data.claimAmount,
-      description: data.description,
+      name: data.name.trim(),
 
+      email: data.email.trim().toLowerCase(),
+
+      claimAmount: Number(data.claimAmount),
+
+      description: data.description?.trim(),
+
+      // Internal generated filename/path.
       document: data.document,
+
+      documents: data.documents?.map((document) => ({
+        filename: document.filename,
+        originalName: document.originalName,
+        mimeType: document.mimeType,
+        size: document.size,
+      })),
+
+      // User-friendly name shown in the UI.
+      documentName: data.documentName?.trim() || undefined,
+
+      // Original uploaded filename.
       documentOriginalName: data.documentOriginalName,
+
       documentMimeType: data.documentMimeType,
+
       documentSize: data.documentSize,
 
       status: ClaimStatus.PENDING,
+
       submissionDate: new Date(),
     });
+
+    return claim;
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // PATIENT: GET MY CLAIMS
-  // ---------------------------------------------------------
+  // =========================================================
 
   async findByPatient(patientId: string) {
     if (!Types.ObjectId.isValid(patientId)) {
@@ -77,9 +121,9 @@ export class ClaimsService {
       .exec();
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // INSURER: GET ALL CLAIMS
-  // ---------------------------------------------------------
+  // =========================================================
 
   async findAll(filters?: {
     status?: ClaimStatus;
@@ -90,29 +134,28 @@ export class ClaimsService {
   }) {
     const query: Record<string, unknown> = {};
 
-    // Status filter
+    // -------------------------------------------------------
+    // STATUS FILTER
+    // -------------------------------------------------------
+
     if (filters?.status) {
       query.status = filters.status;
     }
 
-    // Amount filter
-    if (
-      filters?.minAmount !== undefined ||
-      filters?.maxAmount !== undefined
-    ) {
+    // -------------------------------------------------------
+    // AMOUNT FILTER
+    // -------------------------------------------------------
+
+    if (filters?.minAmount !== undefined || filters?.maxAmount !== undefined) {
       const amountQuery: Record<string, number> = {};
 
       if (filters.minAmount !== undefined) {
         if (Number.isNaN(filters.minAmount)) {
-          throw new BadRequestException(
-            'minAmount must be a valid number',
-          );
+          throw new BadRequestException('minAmount must be a valid number');
         }
 
         if (filters.minAmount < 0) {
-          throw new BadRequestException(
-            'minAmount cannot be negative',
-          );
+          throw new BadRequestException('minAmount cannot be negative');
         }
 
         amountQuery.$gte = filters.minAmount;
@@ -120,15 +163,11 @@ export class ClaimsService {
 
       if (filters.maxAmount !== undefined) {
         if (Number.isNaN(filters.maxAmount)) {
-          throw new BadRequestException(
-            'maxAmount must be a valid number',
-          );
+          throw new BadRequestException('maxAmount must be a valid number');
         }
 
         if (filters.maxAmount < 0) {
-          throw new BadRequestException(
-            'maxAmount cannot be negative',
-          );
+          throw new BadRequestException('maxAmount cannot be negative');
         }
 
         amountQuery.$lte = filters.maxAmount;
@@ -147,7 +186,10 @@ export class ClaimsService {
       query.claimAmount = amountQuery;
     }
 
-    // Date filter
+    // -------------------------------------------------------
+    // DATE FILTER
+    // -------------------------------------------------------
+
     if (filters?.fromDate || filters?.toDate) {
       const dateQuery: Record<string, Date> = {};
 
@@ -155,9 +197,7 @@ export class ClaimsService {
         const startDate = new Date(filters.fromDate);
 
         if (Number.isNaN(startDate.getTime())) {
-          throw new BadRequestException(
-            'fromDate must be a valid date',
-          );
+          throw new BadRequestException('fromDate must be a valid date');
         }
 
         startDate.setHours(0, 0, 0, 0);
@@ -169,9 +209,7 @@ export class ClaimsService {
         const endDate = new Date(filters.toDate);
 
         if (Number.isNaN(endDate.getTime())) {
-          throw new BadRequestException(
-            'toDate must be a valid date',
-          );
+          throw new BadRequestException('toDate must be a valid date');
         }
 
         endDate.setHours(23, 59, 59, 999);
@@ -181,12 +219,11 @@ export class ClaimsService {
 
       if (filters.fromDate && filters.toDate) {
         const startDate = new Date(filters.fromDate);
+
         const endDate = new Date(filters.toDate);
 
         if (startDate > endDate) {
-          throw new BadRequestException(
-            'fromDate cannot be later than toDate',
-          );
+          throw new BadRequestException('fromDate cannot be later than toDate');
         }
       }
 
@@ -201,9 +238,9 @@ export class ClaimsService {
       .exec();
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // GET SINGLE CLAIM
-  // ---------------------------------------------------------
+  // =========================================================
 
   async findById(claimId: string) {
     if (!Types.ObjectId.isValid(claimId)) {
@@ -219,25 +256,42 @@ export class ClaimsService {
     return claim;
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // DOCUMENT ACCESS CHECK
-  // ---------------------------------------------------------
+  // =========================================================
 
   async getDocumentForUser(
     claimId: string,
     userId: string,
     role: string,
+    documentIndex = 0,
   ) {
     const claim = await this.findById(claimId);
 
-    if (!claim.document) {
-      throw new NotFoundException(
-        'No document attached to this claim',
-      );
+    const documents =
+      Array.isArray(claim.documents) && claim.documents.length > 0
+        ? claim.documents
+        : claim.document
+          ? [
+              {
+                filename: claim.document,
+                originalName:
+                  claim.documentOriginalName ||
+                  claim.documentName ||
+                  claim.document,
+                mimeType: claim.documentMimeType || 'application/octet-stream',
+                size: claim.documentSize || 0,
+              },
+            ]
+          : [];
+
+    const document = documents[documentIndex] || documents[0];
+
+    if (!document) {
+      throw new NotFoundException('No document attached to this claim');
     }
 
-    const isOwner =
-      claim.patient.toString() === userId;
+    const isOwner = claim.patient.toString() === userId;
 
     const isInsurer = role === 'INSURER';
 
@@ -247,12 +301,15 @@ export class ClaimsService {
       );
     }
 
-    return claim;
+    return {
+      claim,
+      document,
+    };
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // INSURER: REVIEW CLAIM
-  // ---------------------------------------------------------
+  // =========================================================
 
   async review(
     claimId: string,
@@ -262,54 +319,55 @@ export class ClaimsService {
   ) {
     const claim = await this.findById(claimId);
 
-    // Prevent reviewing an already finalized claim
-    if (
-      claim.status !== ClaimStatus.PENDING
-    ) {
-      throw new BadRequestException(
-        'Only pending claims can be reviewed',
-      );
+    // -------------------------------------------------------
+    // ONLY PENDING CLAIMS CAN BE REVIEWED
+    // -------------------------------------------------------
+
+    if (claim.status !== ClaimStatus.PENDING) {
+      throw new BadRequestException('Only pending claims can be reviewed');
     }
 
-    // Validate approved amount
-    if (
-      approvedAmount !== undefined &&
-      approvedAmount < 0
-    ) {
-      throw new BadRequestException(
-        'Approved amount cannot be negative',
-      );
+    // -------------------------------------------------------
+    // VALIDATE APPROVED AMOUNT
+    // -------------------------------------------------------
+
+    if (approvedAmount !== undefined && approvedAmount < 0) {
+      throw new BadRequestException('Approved amount cannot be negative');
     }
 
-    // Approval requires amount
-    if (
-      status === ClaimStatus.APPROVED &&
-      approvedAmount === undefined
-    ) {
+    // -------------------------------------------------------
+    // APPROVAL REQUIRES AMOUNT
+    // -------------------------------------------------------
+
+    if (status === ClaimStatus.APPROVED && approvedAmount === undefined) {
       throw new BadRequestException(
         'Approved amount is required when approving a claim',
       );
     }
 
-    // Approved amount cannot exceed requested amount
-    if (
-      approvedAmount !== undefined &&
-      approvedAmount > claim.claimAmount
-    ) {
+    // -------------------------------------------------------
+    // APPROVED AMOUNT CANNOT EXCEED CLAIM AMOUNT
+    // -------------------------------------------------------
+
+    if (approvedAmount !== undefined && approvedAmount > claim.claimAmount) {
       throw new BadRequestException(
         'Approved amount cannot exceed the claim amount',
       );
     }
 
-    // Rejected claim cannot have approved amount
-    if (
-      status === ClaimStatus.REJECTED &&
-      approvedAmount !== undefined
-    ) {
+    // -------------------------------------------------------
+    // REJECTED CLAIM CANNOT HAVE APPROVED AMOUNT
+    // -------------------------------------------------------
+
+    if (status === ClaimStatus.REJECTED && approvedAmount !== undefined) {
       throw new BadRequestException(
         'Rejected claims cannot have an approved amount',
       );
     }
+
+    // -------------------------------------------------------
+    // UPDATE CLAIM
+    // -------------------------------------------------------
 
     claim.status = status;
 
@@ -319,8 +377,7 @@ export class ClaimsService {
       claim.approvedAmount = undefined;
     }
 
-    claim.insurerComments =
-      insurerComments?.trim();
+    claim.insurerComments = insurerComments?.trim();
 
     return claim.save();
   }

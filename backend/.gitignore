@@ -57,3 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .env
 uploads/
 dist/
+
+# Uploaded claim documents
+backend/uploads/claims/*
+!backend/uploads/claims/.gitkeep

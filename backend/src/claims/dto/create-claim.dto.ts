@@ -6,6 +6,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
+
 import { Type } from 'class-transformer';
 
 export class CreateClaimDto {
@@ -21,11 +22,15 @@ export class CreateClaimDto {
   @Min(0)
   claimAmount!: number;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  description!: string;
+  description?: string;
 
   @IsOptional()
   @IsString()
   document?: string;
+
+  @IsOptional()
+  @IsString()
+  documentName?: string;
 }
