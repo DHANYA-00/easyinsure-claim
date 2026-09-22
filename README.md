@@ -1,116 +1,46 @@
 # EasyInsure Claims
 
-## 🚀 EasyInsure – Simple, Digital Claims Management
+A secure insurance claims management platform for handling patient submissions and insurer review workflows.
 
-**EasyInsure Claims** is a web-based **insurance claims management platform** designed to simplify the process of submitting, reviewing, and tracking insurance claims.
+## About
+EasyInsure Claims is a full-stack insurance claims platform that helps patients submit claims and allows insurers to review, validate, and approve them in a structured workflow. It simplifies the manual insurance process by centralizing claim submission, document upload, status tracking, and insurer decision-making in one application.
 
-It provides separate experiences for **Patients** and **Insurers**, creating a centralized workflow from claim submission to final approval or rejection.
+## Features
+- Patient login and secure claim submission
+- Supporting document upload for claims
+- Claim tracking with status updates
+- Insurer dashboard for claim review and filtering
+- Approval and rejection workflow with comments and approved amounts
+- Role-based access for patients and insurers
 
----
+## Tech Stack
+Frontend: React.js, Vite
+Backend: Node.js, NestJS
+Database: MongoDB
+Other: JWT Authentication, Multer
 
-## ✨ What You Can Do with EasyInsure
+## How It Works
+Patients log in to the patient portal, submit claims with supporting documents, and monitor claim progress. Insurers log in to a separate dashboard, filter claims, review uploaded evidence, and approve or reject each case. The backend stores claim data in MongoDB and enforces role-based access through JWT-based authentication.
 
-* 🧾 **Submit Claims** – Patients can submit insurance claims with supporting documents.
-* 📊 **Track Claims** – View claim status, submission date, approved amount, and insurer comments.
-* 🏢 **Insurer Dashboard** – Insurers can view and manage submitted claims from one place.
-* 🔎 **Filter Claims** – Filter claims by status, date, and claim amount.
-* 📄 **Document Review** – Insurers can access supporting documents submitted with claims.
-* ✅ **Approve Claims** – Review claims, approve eligible amounts, and add comments.
-* ❌ **Reject Claims** – Reject claims with review comments for the patient.
-* 🔐 **Role-Based Access** – Separate Patient and Insurer access using JWT authentication.
-
----
-
-## 🔄 Claim Workflow
-
-```text
-Patient
-   │
-   │ Submit Claim + Document
-   ▼
-Pending Claim
-   │
-   │ Insurer Review
-   ├───────────────┐
-   ▼               ▼
-Approve          Reject
-   │               │
-   ▼               ▼
-Approved        Rejected
-Amount          + Comments
-   │               │
-   └───────┬───────┘
-           ▼
-     Patient Views
-     Updated Status
+## Installation
+```bash
+git clone https://github.com/username/repo.git
+cd repo
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
----
+## Environment Variables
+```env
+PORT=5000
+MONGO_URI=your_mongo_uri
+JWT_SECRET=your_jwt_secret
+VITE_API_URL=http://localhost:5000
+```
 
-## 🛠️ Tech Stack
+## Challenges & Learnings
+1. Implementing role-based access and claim review logic required careful handling of patient vs insurer permissions and validation rules.
+2. Managing file uploads and document retrieval in the backend helped improve the understanding of secure storage and retrieval workflows for insurance documents.
 
-### 🌐 Frontend
-
-* React.js
-* Vite
-* React Router
-* CSS
-* Fetch API
-
-### 🖥️ Backend
-
-* Node.js
-* NestJS
-* REST API
-* JWT
-* Passport
-* Multer
-
-### 🗄️ Database
-
-* MongoDB
-* Mongoose
-
-### 🔧 Tools
-
-* Git
-* GitHub
-* Postman
-* VS Code
-
----
-
-## 👥 User Roles
-
-### 👤 Patient
-
-* Login
-* Submit claims
-* Upload supporting documents
-* View submitted claims
-* Track claim status
-* View approved amount
-* View insurer comments
-
-### 🏢 Insurer
-
-* Login
-* View all claims
-* Filter claims
-* Review claim details
-* View supporting documents
-* Approve or reject claims
-* Set approved amount
-* Add review comments
-
----
-
-## 🌐 Deployment
-
-* **Frontend:** Coming Soon
-* **Backend:** Coming Soon
-* **Database:** MongoDB Atlas
-
----
-
-🔥 *EasyInsure turns a manual claims process into a simple, centralized digital workflow.*
+## Author
+Dhanya Lakshmi S S
