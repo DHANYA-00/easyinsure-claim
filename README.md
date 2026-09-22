@@ -2,8 +2,6 @@
 
 A secure insurance claims management platform for handling patient submissions and insurer review workflows.
 
-[Live Demo](link)
-
 ## About
 EasyInsure Claims is a full-stack insurance claims platform that helps patients submit claims and allows insurers to review, validate, and approve them in a structured workflow. It simplifies the manual insurance process by centralizing claim submission, document upload, status tracking, and insurer decision-making in one application.
 
